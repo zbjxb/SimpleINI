@@ -24,7 +24,7 @@
 *	https://wiki.unrealengine.com/Custom_Blueprint_Node_Creation
 */
 UCLASS()
-class USimpleINIBPLibrary : public UBlueprintFunctionLibrary
+class SIMPLEINI_API USimpleINIBPLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_UCLASS_BODY()
 
@@ -32,19 +32,22 @@ class USimpleINIBPLibrary : public UBlueprintFunctionLibrary
 	//static float SimpleINISampleFunction(float Param);
 
 	UFUNCTION( BlueprintCallable, meta = (Keywords = "ini"), Category = "SimpleINI" )
-		static bool LoadIniFile( const FString& FilePath );
+		static bool LoadIniFile( const FString& FilePath, bool ClearContent = false );
 
 	UFUNCTION( BlueprintCallable, meta = (Keywords = "ini"), Category = "SimpleINI" )
-		static bool GetValue( const FString& FilePath, const FString& SectionName, const FString& Key, FString& Value, bool& IsValid );
+		static bool GetValue( const FString& FilePath, const FString& SectionName, const FString& Key, FString& Value, bool& IsValid, bool CloseAfterFinish = false );
 
 	UFUNCTION( BlueprintCallable, meta = (Keywords = "ini"), Category = "SimpleINI" )
-		static bool SetValue( const FString& FilePath, const FString& SectionName, const FString& Key, const FString& Value );
+		static bool SetValue( const FString& FilePath, const FString& SectionName, const FString& Key, const FString& Value, bool CloseAfterFinish = false );
 
 	UFUNCTION( BlueprintCallable, meta = (Keywords = "ini"), Category = "SimpleINI" )
-		static bool SaveIniFile( const FString& FilePath );
+		static bool SaveIniFile( const FString& FilePath, bool CloseAfterFinish = false );
 
 	UFUNCTION( BlueprintCallable, meta = (Keywords = "ini"), Category = "SimpleINI" )
 		static bool ReloadIniFile( const FString& FilePath );
+
+	UFUNCTION( BlueprintCallable, meta = (Keywords = "ini"), Category = "SimpleINI" )
+		static void CloseIniFile( const FString& FilePath );
 
 	static TSharedPtr<IniFile> FindFileOpened( const FString& FilePath );
 

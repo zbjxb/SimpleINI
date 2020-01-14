@@ -178,7 +178,7 @@ public:
 	IniFile( ){}
 	virtual ~IniFile( ) {};
 
-	bool LoadFile( const FString& FilePath );
+	bool LoadFile( const FString& FilePath, bool ClearContent = false );
 	bool Save( );
 
 	bool SectionExists( const FString& SectionName ) const;

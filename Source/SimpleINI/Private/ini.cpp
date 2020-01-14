@@ -1,12 +1,19 @@
 #include "ini.h"
 
-bool IniFile::LoadFile( const FString& FilePath )
+bool IniFile::LoadFile( const FString& FilePath, bool ClearContent /*= false*/ )
 {
 	RawLines.Empty( );
 	Root = nullptr;
 
 	mFilePath = FilePath;
-	return FFileHelper::LoadFileToStringArray( RawLines, *FilePath ) && Parse( );
+	if (ClearContent)
+	{
+		return Parse( );
+	}
+	else
+	{
+		return FFileHelper::LoadFileToStringArray( RawLines, *FilePath ) && Parse( );
+	}
 }
 
 bool IniFile::Parse( )

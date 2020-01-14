@@ -16,7 +16,7 @@ USimpleINIBPLibrary::USimpleINIBPLibrary(const FObjectInitializer& ObjectInitial
 //	return -1;
 //}
 
-bool USimpleINIBPLibrary::LoadIniFile( const FString& FilePath )
+bool USimpleINIBPLibrary::LoadIniFile( const FString& FilePath, bool ClearContent /*= false*/ )
 {
 	TSharedPtr<IniFile> Ini = FindFileOpened( FilePath );
 	if (!Ini)
@@ -24,10 +24,10 @@ bool USimpleINIBPLibrary::LoadIniFile( const FString& FilePath )
 		Ini = TSharedPtr<IniFile>( new IniFile( ) );
 		INIs.Add( Ini );
 	}
-	return Ini->LoadFile( FilePath );
+	return Ini->LoadFile( FilePath, ClearContent );
 }
 
-bool USimpleINIBPLibrary::GetValue( const FString& FilePath, const FString& SectionName, const FString& Key, FString& Value, bool& IsValid )
+bool USimpleINIBPLibrary::GetValue( const FString& FilePath, const FString& SectionName, const FString& Key, FString& Value, bool& IsValid, bool CloseAfterFinish/* = false*/ )
 {
 	TSharedPtr<IniFile> Ini = FindFileOpened( FilePath );
 	if (!Ini)
@@ -40,10 +40,15 @@ bool USimpleINIBPLibrary::GetValue( const FString& FilePath, const FString& Sect
 		}
 	}
 
-	return Ini->GetValue( SectionName, Key, Value, IsValid );
+	bool bRet = Ini->GetValue( SectionName, Key, Value, IsValid );
+	if (CloseAfterFinish)
+	{
+		CloseIniFile( FilePath );
+	}
+	return bRet;
 }
 
-bool USimpleINIBPLibrary::SetValue( const FString& FilePath, const FString& SectionName, const FString& Key, const FString& Value )
+bool USimpleINIBPLibrary::SetValue( const FString& FilePath, const FString& SectionName, const FString& Key, const FString& Value, bool CloseAfterFinish/* = false*/ )
 {
 	TSharedPtr<IniFile> Ini = FindFileOpened( FilePath );
 	if (!Ini)
@@ -56,10 +61,16 @@ bool USimpleINIBPLibrary::SetValue( const FString& FilePath, const FString& Sect
 		}
 	}
 
-	return Ini->SetValue( SectionName, Key, Value );
+	bool bRet = Ini->SetValue( SectionName, Key, Value );
+	if (CloseAfterFinish)
+	{
+		bRet = (Ini->Save( ) && bRet);
+		CloseIniFile( FilePath );
+	}
+	return bRet;
 }
 
-bool USimpleINIBPLibrary::SaveIniFile( const FString& FilePath )
+bool USimpleINIBPLibrary::SaveIniFile( const FString& FilePath, bool CloseAfterFinish/* = false*/ )
 {
 	TSharedPtr<IniFile> Ini = FindFileOpened( FilePath );
 	if (!Ini)
@@ -67,7 +78,12 @@ bool USimpleINIBPLibrary::SaveIniFile( const FString& FilePath )
 		return false;
 	}
 
-	return Ini->Save( );
+	bool bRet = Ini->Save( );
+	if (CloseAfterFinish)
+	{
+		CloseIniFile( FilePath );
+	}
+	return bRet;
 }
 
 bool USimpleINIBPLibrary::ReloadIniFile( const FString& FilePath )
@@ -80,6 +96,19 @@ bool USimpleINIBPLibrary::ReloadIniFile( const FString& FilePath )
 	}
 
 	return Ini->LoadFile( FilePath );
+}
+
+void USimpleINIBPLibrary::CloseIniFile( const FString& FilePath )
+{
+	for (int i = 0; i < INIs.Num( ); ++i)
+	{
+		TSharedPtr<IniFile> Ini = INIs[i];
+		if (Ini && (Ini->mFilePath == FilePath))
+		{
+			INIs.RemoveAt( i );
+			return;
+		}
+	}
 }
 
 TSharedPtr<IniFile> USimpleINIBPLibrary::FindFileOpened( const FString& FilePath )
